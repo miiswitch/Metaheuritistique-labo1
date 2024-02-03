@@ -69,7 +69,7 @@ int main(int NbParam, char *Param[])
 	
 	//**Lecture du fichier de donnees
 	LectureProbleme(NomFichier, LeProb, LAlgo);
-	AfficherProbleme(LeProb);
+	//AfficherProbleme(LeProb);
 	
 	//**Creation de la solution initiale 
 	CreerSolutionAleatoire(Courante, LeProb, LAlgo);
@@ -158,9 +158,9 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
 	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j+1] et [j, i+1]
-	auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
-	Copie.Seq[i + 1] = Copie.Seq[j+1];
-	Copie.Seq[j + 1] = tmp;
+	//auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
+	//Copie.Seq[i + 1] = Copie.Seq[(j+1)% sizeof(uneSol.Seq)];
+	//Copie.Seq[(j + 1) % sizeof(uneSol.Seq)] = tmp;
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
