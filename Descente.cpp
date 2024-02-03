@@ -44,7 +44,7 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 
 //DESCRIPTION:	Application du type de voisinage selectionne. La fonction retourne la solution voisine obtenue suite a l'application du type de voisinage.
 //NB:uneSol ne doit pas etre modifiee (const)
-TSolution	AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
+TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
 
 //... vous pouvez ajouter vos fonctions locales
 
@@ -69,7 +69,7 @@ int main(int NbParam, char *Param[])
 	
 	//**Lecture du fichier de donnees
 	LectureProbleme(NomFichier, LeProb, LAlgo);
-	//AfficherProbleme(LeProb);
+	AfficherProbleme(LeProb);
 	
 	//**Creation de la solution initiale 
 	CreerSolutionAleatoire(Courante, LeProb, LAlgo);
@@ -102,7 +102,7 @@ int main(int NbParam, char *Param[])
 	
 	LibererMemoireFinPgm(Courante, Next, Best, LeProb);
 	
-	//system("PAUSE");
+	system("PAUSE");
 
 	return 0;
 }
@@ -117,18 +117,20 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 	//Parcours dans le voisinage : 		A MODIFIER...(Deterministe, Aleatoire, Oriente ou partiellement Oriente)  	NB: selon la configuration presente: Il n'y a pas de modification/voisinage
 	//Regle de pivot : 					A MODIFIER...(First-Impove, Best-Impove, k-Impove/Alea ou k-Improve/Best)  	NB: selon la configuration presente: First-Improve (k = TailleVoisinage)
 
-	//First-Improve
+	//k - Improve / Best
 	TSolution unVoisin, unAutreVoisin;
 	int i;
-	bool Mieux;
+	int k = unAlgo.TailleVoisinage; // <!> A MODIFIER
 
-	i = 0; Mieux = false;
-	while (i <= unAlgo.TailleVoisinage && !Mieux)
+	// On génère k voisins et on conserve le meilleur
+	for (i = 0; i < k; i++)
 	{
-		unVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
-		if (unVoisin.FctObj < uneSol.FctObj) Mieux = true;
-		else i++;
+		unAutreVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
+
+		if (unAutreVoisin.FctObj < unVoisin.FctObj)
+			unVoisin = unAutreVoisin; // On conserve le meilleur voisin parmis les k voisins
 	};
+
 	return unVoisin;
 }
 
@@ -137,15 +139,28 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 //NB: La solution courante (uneSol) ne doit pas etre modifiee (const)
 TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo)
 {
-	//Type (structure) de voisinage : 	A DETERMINER...	
+	//Type (structure) de voisinage : 	2-opt
 	TSolution Copie;
 
 	//Utilisation d'une nouvelle TSolution pour ne pas modifier La solution courante (uneSol)
 	Copie = uneSol;
 
-	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : echange, insertion, 2-opt, etc.
-	//.......... A COMPLETER  ou APPEL a une fonction que vous pouvez creer
-	//Ici la solution Copie demeure identique a la solution uneSol
+	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : 2-opt
+	
+	// - Stratégie d'orientation partiellement orienté pour le voisinage : 
+	// On commence par une orientation aléatoire :
+	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
+	// On doit avoir j > i + 1 pour éviter les doublons et que les arêtes soient consécutives
+
+	int i = rand() % (sizeof(uneSol.Seq) - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
+	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
+	int j = rand() % (sizeof(uneSol.Seq) - i - 2) + i; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
+	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
+
+	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j+1] et [j, i+1]
+	auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
+	Copie.Seq[i + 1] = Copie.Seq[j+1];
+	Copie.Seq[j + 1] = tmp;
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
