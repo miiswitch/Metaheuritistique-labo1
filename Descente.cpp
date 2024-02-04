@@ -113,22 +113,20 @@ int main(int NbParam, char *Param[])
 //Ainsi, si la ReGLE DE PIVOT necessite l'etude de plusieurs voisins (TailleVoisinage>1), la fonction "AppliquerVoisinage()" sera appelee plusieurs fois.
 TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &unAlgo)
 {
-	//Type (structure) de voisinage : 	A MODIFIER... dans la fonction AppliquerVoisinage()							NB: selon la configuration presente: Il n'y a pas de modification/voisinage
-	//Parcours dans le voisinage : 		A MODIFIER...(Deterministe, Aleatoire, Oriente ou partiellement Oriente)  	NB: selon la configuration presente: Il n'y a pas de modification/voisinage
-	//Regle de pivot : 					A MODIFIER...(First-Impove, Best-Impove, k-Impove/Alea ou k-Improve/Best)  	NB: selon la configuration presente: First-Improve (k = TailleVoisinage)
+	/*
+		Structure : 2-opt
+		Parcours : partiellement orienté
+		Règle de pivot : k-improve (best)
+	*/
 
-	//k - Improve / Best
-	TSolution unVoisin, unAutreVoisin;
+	TSolution unVoisin = uneSol; // On initialise unVoisin avec la solution courante
 
-	unVoisin = uneSol; // On initialise unVoisin avec la solution courante
-
-	int i;
-	int k = 3; // <!> A MODIFIER
+	constexpr int k = 3; // Nombre de voisins à générer
 
 	// On génère k voisins et on conserve le meilleur
-	for (i = 0; i < k; i++)
+	for (int i = 0; i < k; i++)
 	{
-		unAutreVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
+		const TSolution unAutreVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
 
 		if (unAutreVoisin.FctObj < unVoisin.FctObj)
 			unVoisin = unAutreVoisin; // On conserve le meilleur voisin parmis les k voisins
@@ -142,30 +140,35 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 //NB: La solution courante (uneSol) ne doit pas etre modifiee (const)
 TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo)
 {
-	//Type (structure) de voisinage : 	2-opt
-	TSolution Copie;
-
 	//Utilisation d'une nouvelle TSolution pour ne pas modifier La solution courante (uneSol)
-	Copie = uneSol;
+	TSolution Copie = uneSol;
 
 	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : 2-opt
 	
 	// - Stratégie d'orientation partiellement orienté pour le voisinage : 
+	
 	// On commence par une orientation aléatoire :
 	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
 	// On doit avoir j > i + 1 pour éviter les doublons et que les arêtes soient consécutives
 
-	int i = rand() % (uneSol.Seq.size() - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
+	const auto seqSize = uneSol.Seq.size();
+
+	const size_t i = rand() % (seqSize - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
-	int j = rand() % (uneSol.Seq.size() - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
+	
+	//const size_t j = rand() % (seqSize - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
+	auto& DistFromI = unProb.Distance[i];
+	const size_t j = std::distance(DistFromI.begin(), std::min_element(DistFromI.begin(), DistFromI.end()));
+
 	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j+1] et [j, i+1]
-	auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
-	Copie.Seq[i + 1] = Copie.Seq[(j+1)% uneSol.Seq.size()];
-	Copie.Seq[(j + 1) % uneSol.Seq.size()] = tmp;
+	auto tmp = Copie.Seq[i + 1]; // Sauvegarde temporaire de la ville i+1
+	Copie.Seq[i + 1] = Copie.Seq[(j+1) % seqSize];
+	Copie.Seq[(j + 1) % seqSize] = tmp;
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
-	return(Copie);
+
+	return (Copie);
 }
