@@ -121,7 +121,7 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 
 	TSolution unVoisin = uneSol; // On initialise unVoisin avec la solution courante
 
-	constexpr int k = 3; // Nombre de voisins à générer
+	constexpr int k = 10; // Nombre de voisins à générer
 
 	// On génère k voisins et on conserve le meilleur
 	for (int i = 0; i < k; i++)
@@ -156,16 +156,22 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	const size_t i = rand() % (seqSize - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
 	
-	//const size_t j = rand() % (seqSize - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
+	const size_t j = rand() % (seqSize - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
-	auto& DistFromI = unProb.Distance[i];
-	const size_t j = std::distance(DistFromI.begin(), std::min_element(DistFromI.begin(), DistFromI.end()));
+	//auto& DistFromI = unProb.Distance[i];
+	//const size_t j = std::distance(DistFromI.begin(), std::min_element(DistFromI.begin(), DistFromI.end()));
 
-	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j+1] et [j, i+1]
+	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j] et [j, i+1]
+	//auto tmp = Copie.Seq[i + 1]; // Sauvegarde temporaire de la ville i+1
+	//Copie.Seq[i + 1] = Copie.Seq[(j+1) % seqSize];
+	//Copie.Seq[(j + 1) % seqSize] = tmp;
+
+
+	// Echange les deux villes i+1 et j dans la séquence => les arêtes deviennent [i, j] et [i+1, j+1]
 	auto tmp = Copie.Seq[i + 1]; // Sauvegarde temporaire de la ville i+1
-	Copie.Seq[i + 1] = Copie.Seq[(j+1) % seqSize];
-	Copie.Seq[(j + 1) % seqSize] = tmp;
+	Copie.Seq[i + 1] = Copie.Seq[j];
+	Copie.Seq[j] = tmp;
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
