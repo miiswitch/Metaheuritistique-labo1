@@ -119,8 +119,11 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 
 	//k - Improve / Best
 	TSolution unVoisin, unAutreVoisin;
+
+	unVoisin = uneSol; // On initialise unVoisin avec la solution courante
+
 	int i;
-	int k = unAlgo.TailleVoisinage; // <!> A MODIFIER
+	int k = 3; // <!> A MODIFIER
 
 	// On génère k voisins et on conserve le meilleur
 	for (i = 0; i < k; i++)
@@ -152,15 +155,15 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
 	// On doit avoir j > i + 1 pour éviter les doublons et que les arêtes soient consécutives
 
-	int i = rand() % (sizeof(uneSol.Seq) - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
+	int i = rand() % (uneSol.Seq.size() - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
-	int j = rand() % (sizeof(uneSol.Seq) - i - 2) + i; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
+	int j = rand() % (uneSol.Seq.size() - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
 	// Echange les deux villes j+1 et i+1 => les arêtes deviennent [i, j+1] et [j, i+1]
-	//auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
-	//Copie.Seq[i + 1] = Copie.Seq[(j+1)% sizeof(uneSol.Seq)];
-	//Copie.Seq[(j + 1) % sizeof(uneSol.Seq)] = tmp;
+	auto tmp = Copie.Seq[i + 1]; // Sauvegarde de la ville i+1
+	Copie.Seq[i + 1] = Copie.Seq[(j+1)% uneSol.Seq.size()];
+	Copie.Seq[(j + 1) % uneSol.Seq.size()] = tmp;
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
