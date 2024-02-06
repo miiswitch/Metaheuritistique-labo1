@@ -162,6 +162,9 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	std::vector<int> liste_ville = unProb.Distance[i];
 	//erase the value of the city i
 	liste_ville[i] = INT_MAX;
+	//erase the value of the city i+1 and i-1 to prevent the selection of a city next to i
+	liste_ville[(i + 1) % seqSize] = INT_MAX;
+	liste_ville[(i - 1) % seqSize] = INT_MAX;
 	for (size_t k = 0; k < 3; k++)
 	{
 		auto min = std::min_element(liste_ville.begin(), liste_ville.end());
