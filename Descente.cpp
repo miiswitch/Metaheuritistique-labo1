@@ -46,6 +46,7 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 //NB:uneSol ne doit pas etre modifiee (const)
 TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
 
+TSolution Appliquer2Opt(TSolution uneSol, int a, int b);
 //... vous pouvez ajouter vos fonctions locales
 
 //******************************************************************************************
@@ -186,12 +187,27 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 
 	// Echange les deux villes i+1 et j dans la séquence => les arêtes deviennent [i, j] et [i+1, j+1]
-	auto tmp = Copie.Seq[i + 1]; // Sauvegarde temporaire de la ville i+1
-	Copie.Seq[i + 1] = Copie.Seq[j];
-	Copie.Seq[j] = tmp;
+	//auto tmp = Copie.Seq[i + 1]; // Sauvegarde temporaire de la ville i+1
+	//Copie.Seq[i + 1] = Copie.Seq[j];
+	//Copie.Seq[j] = tmp;
+
+	Copie = Appliquer2Opt(Copie, i + 1, j);
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
 
 	return (Copie);
+}
+
+TSolution Appliquer2Opt(TSolution uneSol, int a, int b)
+{
+	while (a < b)
+	{
+		auto tmp = uneSol.Seq[a];
+		uneSol.Seq[a] = uneSol.Seq[b];
+		uneSol.Seq[b] = tmp;
+		a += 1;
+		b -= 1;
+	}
+	return uneSol;
 }
