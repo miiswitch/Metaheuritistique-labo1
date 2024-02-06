@@ -13,7 +13,7 @@
 extern "C" _declspec(dllimport) void LectureProbleme(std::string FileName, TProblem & unProb, TAlgo & unAlgo);
 
 //DESCRIPTION:	Fonction d'affichage a l'ecran permettant de voir si les donnees du fichier probleme ont ete lues correctement
-extern "C" _declspec(dllimport) void AfficherProbleme (TProblem unProb);
+extern "C" _declspec(dllimport) void AfficherProbleme(TProblem unProb);
 
 //DESCRIPTION: Affichage d'une solution a l'ecran pour validation
 extern "C" _declspec(dllimport) void AfficherSolution(const TSolution uneSolution, TProblem unProb, std::string Titre);
@@ -26,13 +26,13 @@ extern "C" _declspec(dllimport) void EvaluerSolution(TSolution & uneSol, TProble
 extern "C" _declspec(dllimport) void CreerSolutionAleatoire(TSolution & uneSolution, TProblem unProb, TAlgo & unAlgo);
 
 //DESCRIPTION: Affichage a l'ecran de la solution finale (et de son statut de validite), du nombre d'evaluations effectuees et de certains parametres
-extern "C" _declspec(dllimport) void AfficherResultats (const TSolution uneSol, TProblem unProb, TAlgo unAlgo);
+extern "C" _declspec(dllimport) void AfficherResultats(const TSolution uneSol, TProblem unProb, TAlgo unAlgo);
 
 //DESCRIPTION: Affichage dans un fichier(en append) de la solution finale (et de son statut de validite), du nombre d'evaluations effectuees et de certains parametres
-extern "C" _declspec(dllimport) void AfficherResultatsFichier (const TSolution uneSol, TProblem unProb, TAlgo unAlgo, std::string FileName);
+extern "C" _declspec(dllimport) void AfficherResultatsFichier(const TSolution uneSol, TProblem unProb, TAlgo unAlgo, std::string FileName);
 
 //DESCRIPTION:	Liberation de la memoire allouee dynamiquement pour les differentes structures en parametre
-extern "C" _declspec(dllimport) void	LibererMemoireFinPgm	(TSolution uneCourante, TSolution uneNext, TSolution uneBest, TProblem unProb);
+extern "C" _declspec(dllimport) void	LibererMemoireFinPgm(TSolution uneCourante, TSolution uneNext, TSolution uneBest, TProblem unProb);
 
 //*****************************************************************************************
 // Prototype des fonctions locales 
@@ -40,18 +40,19 @@ extern "C" _declspec(dllimport) void	LibererMemoireFinPgm	(TSolution uneCourante
 
 //DESCRIPTION:	Creation d'une solution voisine a partir de la solution uneSol. Definition la STRATEGIE D'ORIENTATION (Parcours/Regle de pivot).
 //NB:uneSol ne doit pas etre modifiee (const)
-TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &unAlgo);
+TSolution GetSolutionVoisine(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
 
 //DESCRIPTION:	Application du type de voisinage selectionne. La fonction retourne la solution voisine obtenue suite a l'application du type de voisinage.
 //NB:uneSol ne doit pas etre modifiee (const)
-TSolution	AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
+TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo);
 
+TSolution Appliquer2opt(TSolution uneSol, size_t a, size_t b);
 //... vous pouvez ajouter vos fonctions locales
 
 //******************************************************************************************
 // Fonction main
 //*****************************************************************************************
-int main(int NbParam, char *Param[])
+int main(int NbParam, char* Param[])
 {
 	TSolution Courante;		//Solution active au cours des iterations
 	TSolution Next;			//Solution voisine retenue a une iteration
@@ -59,18 +60,18 @@ int main(int NbParam, char *Param[])
 	TProblem LeProb;		//Definition de l'instance de probleme
 	TAlgo LAlgo;			//Definition des parametres de l'agorithme
 	string NomFichier;
-		
+
 	//**Lecture des parametres
 	NomFichier.assign(Param[1]);
 	LAlgo.TailleVoisinage = atoi(Param[2]);
-	LAlgo.NB_EVAL_MAX= atoi(Param[3]);
-	
-	srand((unsigned) time(NULL));		//**Precise un germe pour le generateur aleatoire
-	
+	LAlgo.NB_EVAL_MAX = atoi(Param[3]);
+
+	srand((unsigned)time(NULL));		//**Precise un germe pour le generateur aleatoire
+
 	//**Lecture du fichier de donnees
 	LectureProbleme(NomFichier, LeProb, LAlgo);
 	//AfficherProbleme(LeProb);
-	
+
 	//**Creation de la solution initiale 
 	CreerSolutionAleatoire(Courante, LeProb, LAlgo);
 	AfficherSolution(Courante, LeProb, "SOLUTION INITIALE: ");
@@ -95,14 +96,14 @@ int main(int NbParam, char *Param[])
 			//Modification de la solution courante
 			Courante = Next;
 		}
-	}while (LAlgo.CptEval < LAlgo.NB_EVAL_MAX && Courante.FctObj!=0); //Critere d'arret (ne pas enlever/modifier)
-	
+	} while (LAlgo.CptEval < LAlgo.NB_EVAL_MAX && Courante.FctObj != 0); //Critere d'arret (ne pas enlever/modifier)
+
 	AfficherResultats(Courante, LeProb, LAlgo);
-	AfficherResultatsFichier(Courante, LeProb, LAlgo,"Resultats.txt");
-	
+	AfficherResultatsFichier(Courante, LeProb, LAlgo, "Resultats.txt");
+
 	LibererMemoireFinPgm(Courante, Next, Best, LeProb);
-	
-	//system("PAUSE");
+
+	system("PAUSE");
 
 	return 0;
 }
@@ -111,24 +112,27 @@ int main(int NbParam, char *Param[])
 //DESCRIPTION: Creation d'une solution voisine a partir de la solution courante (uneSol) qui ne doit pas etre modifiee.
 //Dans cette fonction, appel de la fonction AppliquerVoisinage() pour obtenir une solution voisine selon un TYPE DE VOISINAGE selectionne + Definition la STRATEGIE D'ORIENTATION (Parcours/Regle de pivot).
 //Ainsi, si la ReGLE DE PIVOT necessite l'etude de plusieurs voisins (TailleVoisinage>1), la fonction "AppliquerVoisinage()" sera appelee plusieurs fois.
-TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &unAlgo)
+TSolution GetSolutionVoisine(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo)
 {
-	//Type (structure) de voisinage : 	A MODIFIER... dans la fonction AppliquerVoisinage()							NB: selon la configuration presente: Il n'y a pas de modification/voisinage
-	//Parcours dans le voisinage : 		A MODIFIER...(Deterministe, Aleatoire, Oriente ou partiellement Oriente)  	NB: selon la configuration presente: Il n'y a pas de modification/voisinage
-	//Regle de pivot : 					A MODIFIER...(First-Impove, Best-Impove, k-Impove/Alea ou k-Improve/Best)  	NB: selon la configuration presente: First-Improve (k = TailleVoisinage)
+	/*
+		Structure : 2-opt
+		Parcours : partiellement orienté
+		Règle de pivot : k-improve (best)
+	*/
 
-	//First-Improve
-	TSolution unVoisin, unAutreVoisin;
-	int i;
-	bool Mieux;
+	TSolution unVoisin = uneSol; // On initialise unVoisin avec la solution courante
 
-	i = 0; Mieux = false;
-	while (i <= unAlgo.TailleVoisinage && !Mieux)
+	constexpr int k = 10; // Nombre de voisins à générer
+
+	// On génère k voisins et on conserve le meilleur
+	for (int i = 0; i < k; i++)
 	{
-		unVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
-		if (unVoisin.FctObj < uneSol.FctObj) Mieux = true;
-		else i++;
+		const TSolution unAutreVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
+
+		if (unAutreVoisin.FctObj < unVoisin.FctObj)
+			unVoisin = unAutreVoisin; // On conserve le meilleur voisin parmis les k voisins
 	};
+
 	return unVoisin;
 }
 
@@ -137,17 +141,87 @@ TSolution GetSolutionVoisine (const TSolution uneSol, TProblem unProb, TAlgo &un
 //NB: La solution courante (uneSol) ne doit pas etre modifiee (const)
 TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo)
 {
-	//Type (structure) de voisinage : 	A DETERMINER...	
-	TSolution Copie;
-
 	//Utilisation d'une nouvelle TSolution pour ne pas modifier La solution courante (uneSol)
-	Copie = uneSol;
+	TSolution Copie = uneSol;
 
-	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : echange, insertion, 2-opt, etc.
-	//.......... A COMPLETER  ou APPEL a une fonction que vous pouvez creer
-	//Ici la solution Copie demeure identique a la solution uneSol
+	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : 2-opt
+
+	// - Stratégie d'orientation partiellement orienté pour le voisinage : 
+
+	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
+
+	const size_t seqSize = Copie.Seq.size();
+
+	const size_t i = rand() % seqSize; // Position aléatoire de la première arête dans la séquence en respectant la contrainte
+	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
+
+	// On prend dans unProb les k villes les plus proche de la ville i et i+1, en faisant attention à ne pas prendre une ville à côté de celles ci
+	constexpr int k = 5;
+
+	size_t idVillesProches[k];
+
+	// Liste des distances de la ville i + distances de la ville i+1
+	std::vector<int> distancesVilles;
+	distancesVilles.reserve(seqSize);
+
+	for (size_t j = 0; j < seqSize; j++)
+	{
+		distancesVilles.push_back(unProb.Distance[i][j] + unProb.Distance[(i+1) % seqSize][(j+1) % seqSize]);
+	}
+
+	// Retire les villes i, i-1 and i+1 pour éviter leur sélection
+	for (int offset = -1; offset <= 1; offset++)
+	{
+		int a = (i + offset) % seqSize; // Utilisation de modulo pour éviter le débordement
+		distancesVilles[a] = INT_MAX;
+	}
+
+	// Retrouves les k villes les plus petites distances
+	for (size_t a = 0; a < k; a++)
+	{
+		auto min = std::min_element(distancesVilles.begin(), distancesVilles.end());
+
+		idVillesProches[a] = std::distance(distancesVilles.begin(), min);
+		distancesVilles[a] = INT_MAX;
+	}
+
+	// Retrouve les k plus grandes distances
+	/*for (size_t a = 0; a < k; a++)
+	{
+		auto max = std::max_element(distancesVilles.begin(), distancesVilles.end());
+		idVillesProches[a] = std::distance(distancesVilles.begin(), max);
+		distancesVilles[a] = INT_MIN;
+	}*/
+
+
+	// Choisi aléatoirement l'index parmis les distances les plus petites
+	const size_t j = idVillesProches[rand() % k];
+
+	Copie = Appliquer2opt(Copie, (i + 1) % seqSize, j);
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
-	return(Copie);
+
+	return (Copie);
+}
+
+
+TSolution Appliquer2opt(TSolution uneSol, size_t a, size_t b)
+{
+    int taille = uneSol.Seq.size();
+	if (a > b)
+	{
+		auto tmp = a;
+		a = (b + 1) % taille;
+		b = (tmp - 1 + taille) % taille;
+	}
+    while (a < b)
+    {
+        auto tmp = uneSol.Seq[a];
+        uneSol.Seq[a] = uneSol.Seq[b];
+        uneSol.Seq[b] = tmp;
+        a = (a + 1) % taille;
+        b = (b - 1 + taille) % taille;
+    }
+    return uneSol;
 }
