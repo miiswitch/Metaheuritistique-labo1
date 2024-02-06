@@ -150,39 +150,54 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
 
-	const size_t i = rand() % (uneSol.Seq.size() - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
+	const size_t seqSize = Copie.Seq.size();
+
+	const size_t i = rand() % seqSize; // Position aléatoire de la première arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
 
-	// On prend dans unProb les trois villes les plus proche de la ville i, en faisant attention à ne pas prendre une ville à côté de i
-	constexpr int k = 10;
+	// On prend dans unProb les k villes les plus proche de la ville i et i+1, en faisant attention à ne pas prendre une ville à côté de celles ci
+	constexpr int k = 5;
 
 	size_t idVillesProches[k];
 
-	// Fait une copie de la liste des distances de la ville i
-	std::vector<int> distancesVilles = unProb.Distance[i];
+	// Liste des distances de la ville i + distances de la ville i+1
+	std::vector<int> distancesVilles;
+	distancesVilles.reserve(seqSize);
 
-	// Remove the value of the city i, i-1 and i+1 to prevent the selection of a city next to i
-	for (int offset = -1; offset <= 1; offset++)
+	for (size_t j = 0; j < seqSize; j++)
 	{
-		int a = (i + offset) % distancesVilles.size(); // Utilisation de modulo pour éviter le débordement
-		distancesVilles.erase(distancesVilles.begin() + a);
-		//distanceVilles[a] = INT_MAX;
+		distancesVilles.push_back(unProb.Distance[i][j] + unProb.Distance[(i+1) % seqSize][(j+1) % seqSize]);
 	}
 
-	// Add the three closest cities to city i and store their index in the troisVilles vector
+	// Retire les villes i, i-1 and i+1 pour éviter leur sélection
+	for (int offset = -1; offset <= 1; offset++)
+	{
+		int a = (i + offset) % seqSize; // Utilisation de modulo pour éviter le débordement
+		distancesVilles[a] = INT_MAX;
+	}
+
+	// Retrouves les k villes les plus petites distances
 	for (size_t a = 0; a < k; a++)
 	{
 		auto min = std::min_element(distancesVilles.begin(), distancesVilles.end());
 
 		idVillesProches[a] = std::distance(distancesVilles.begin(), min);
-
-		distancesVilles.erase(distancesVilles.begin() + idVillesProches[a]);
+		distancesVilles[a] = INT_MAX;
 	}
 
-	//choose a random city among the three
+	// Retrouve les k plus grandes distances
+	/*for (size_t a = 0; a < k; a++)
+	{
+		auto max = std::max_element(distancesVilles.begin(), distancesVilles.end());
+		idVillesProches[a] = std::distance(distancesVilles.begin(), max);
+		distancesVilles[a] = INT_MIN;
+	}*/
+
+
+	// Choisi aléatoirement l'index parmis les distances les plus petites
 	const size_t j = idVillesProches[rand() % k];
 
-	Copie = Appliquer2opt(Copie, i + 1, j);
+	Copie = Appliquer2opt(Copie, (i + 1) % seqSize, j);
 
 	//Le nouveau voisin doit etre evalue et retourne
 	EvaluerSolution(Copie, unProb, unAlgo);
@@ -191,19 +206,16 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 }
 
 
-TSolution Appliquer2opt(TSolution uneSol, size_t i, size_t j)
+TSolution Appliquer2opt(TSolution uneSol, size_t a, size_t b)
 {
-	size_t a = std::min(i, j);
-	size_t b = std::max(i, j);
-
-	while (a < b)
+	size_t taille = uneSol.Seq.size();
+	while (a != b && (a - 1 + taille) % taille != b)
 	{
 		auto tmp = uneSol.Seq[a];
 		uneSol.Seq[a] = uneSol.Seq[b];
 		uneSol.Seq[b] = tmp;
-		a += 1;
-		b -= 1;
+		a = (a + 1) % taille;
+		b = (b - 1 + taille) % taille;
 	}
-
 	return uneSol;
 }
