@@ -142,15 +142,11 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	TSolution Copie = uneSol;
 
 	//Transformation de la solution Copie selon le type (structure) de voisinage selectionne : 2-opt
-
 	// - Stratégie d'orientation partiellement orienté pour le voisinage : 
-
 	// Les arêtes sont constitués de deux villes consécutives dans la séquence à la position tel que les arêtes sont [i, i+1] et [j, j+1]
 
 	const size_t seqSize = Copie.Seq.size();
-
 	const size_t i = rand() % seqSize; // Position aléatoire de la première arête dans la séquence en respectant la contrainte
-	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
 
 	// On prend dans unProb les k villes les plus proche de la ville i et i+1, en faisant attention à ne pas prendre une ville à côté de celles ci
 	constexpr int k = 5;
@@ -173,16 +169,15 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 		distancesVilles[a] = INT_MAX;
 	}
 
-	// Retrouves les k villes les plus petites distances
+	// On prend les k villes les plus proches de la ville i
 	for (size_t a = 0; a < k; a++)
 	{
 		auto min = std::min_element(distancesVilles.begin(), distancesVilles.end());
-
 		idVillesProches[a] = std::distance(distancesVilles.begin(), min);
 		distancesVilles[a] = INT_MAX;
 	}
 
-	// Choisi aléatoirement l'index parmis les distances les plus petites
+	// Choisi aléatoirement une ville parmis les k villes les plus proches de la ville i
 	const size_t j = idVillesProches[rand() % k];
 
 	Copie = Appliquer2opt(Copie, (i + 1) % seqSize, j);
