@@ -122,17 +122,16 @@ TSolution GetSolutionVoisine(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 	TSolution unVoisin = uneSol; // On initialise unVoisin avec la solution courante
 
-	constexpr int k = 10; // Nombre de voisins à générer
+	int k = unAlgo.TailleVoisinage; // Nombre de voisins à générer
 
 	// On génère k voisins et on conserve le meilleur
 	for (int i = 0; i < k; i++)
 	{
 		const TSolution unAutreVoisin = AppliquerVoisinage(uneSol, unProb, unAlgo);
-
+	
 		if (unAutreVoisin.FctObj < unVoisin.FctObj)
 			unVoisin = unAutreVoisin; // On conserve le meilleur voisin parmis les k voisins
 	};
-
 	return unVoisin;
 }
 
