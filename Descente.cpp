@@ -108,7 +108,6 @@ int main(int NbParam, char* Param[])
 	return 0;
 }
 
-//*** A MODIFIER ***
 //DESCRIPTION: Creation d'une solution voisine a partir de la solution courante (uneSol) qui ne doit pas etre modifiee.
 //Dans cette fonction, appel de la fonction AppliquerVoisinage() pour obtenir une solution voisine selon un TYPE DE VOISINAGE selectionne + Definition la STRATEGIE D'ORIENTATION (Parcours/Regle de pivot).
 //Ainsi, si la ReGLE DE PIVOT necessite l'etude de plusieurs voisins (TailleVoisinage>1), la fonction "AppliquerVoisinage()" sera appelee plusieurs fois.
@@ -135,7 +134,6 @@ TSolution GetSolutionVoisine(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	return unVoisin;
 }
 
-//*** A MODIFIER *** selon le type (structure) de voisinage selectionne : echange, insertion, 2-opt, etc.
 //DESCRIPTION: Fonction appliquant le type de voisinage selectionne. La fonction retourne la solution voisine obtenue suite a l'application du type de voisinage.
 //NB: La solution courante (uneSol) ne doit pas etre modifiee (const)
 TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unAlgo)
@@ -183,15 +181,6 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 		idVillesProches[a] = std::distance(distancesVilles.begin(), min);
 		distancesVilles[a] = INT_MAX;
 	}
-
-	// Retrouve les k plus grandes distances
-	/*for (size_t a = 0; a < k; a++)
-	{
-		auto max = std::max_element(distancesVilles.begin(), distancesVilles.end());
-		idVillesProches[a] = std::distance(distancesVilles.begin(), max);
-		distancesVilles[a] = INT_MIN;
-	}*/
-
 
 	// Choisi aléatoirement l'index parmis les distances les plus petites
 	const size_t j = idVillesProches[rand() % k];
