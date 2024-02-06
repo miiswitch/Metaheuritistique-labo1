@@ -155,8 +155,22 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 	const size_t i = rand() % (seqSize - 2); // Position aléatoire de la première arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10, i peut être compris entre 0 et 7
-	
-	const size_t j = rand() % (seqSize - i - 2) + i + 2; // Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
+
+	//On prend dans unProb les trois villes les plus proche de la ville i, en faisant attention à ne pas prendre une ville à côté de i
+	std::vector<int> troisVilles;
+	//fait une copie de la liste des distances de la ville i
+	std::vector<int> liste_ville = unProb.Distance[i];
+	//erase the value of the city i
+	liste_ville[i] = INT_MAX;
+	for (size_t k = 0; k < 3; k++)
+	{
+		auto min = std::min_element(liste_ville.begin(), liste_ville.end());
+		troisVilles.push_back(std::distance(liste_ville.begin(), min));
+		*min = INT_MAX;
+	}
+	//choose a random city among the three
+	const size_t j = troisVilles[rand() % 3];
+	// Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
 	//auto& DistFromI = unProb.Distance[i];
