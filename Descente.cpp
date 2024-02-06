@@ -201,13 +201,14 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 TSolution Appliquer2Opt(TSolution uneSol, int a, int b)
 {
-	while (a < b)
+	int taille = uneSol.Seq.size();
+	while (a != b && (a - 1 + taille) % taille != b)
 	{
 		auto tmp = uneSol.Seq[a];
 		uneSol.Seq[a] = uneSol.Seq[b];
 		uneSol.Seq[b] = tmp;
-		a += 1;
-		b -= 1;
+		a = (a + 1) % taille;
+		b = (b - 1 + taille) % taille;
 	}
 	return uneSol;
 }
