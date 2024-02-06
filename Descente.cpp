@@ -166,14 +166,14 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	//erase the value of the city i+1 and i-1 to prevent the selection of a city next to i
 	liste_ville[(i + 1) % seqSize] = INT_MAX;
 	liste_ville[(i - 1) % seqSize] = INT_MAX;
-	for (size_t k = 0; k < 3; k++)
+	for (size_t k = 0; k < 5; k++)
 	{
 		auto min = std::min_element(liste_ville.begin(), liste_ville.end());
 		troisVilles.push_back(std::distance(liste_ville.begin(), min));
 		*min = INT_MAX;
 	}
 	//choose a random city among the three
-	const size_t j = troisVilles[rand() % 3];
+	const size_t j = troisVilles[rand() % 5];
 	// Position aléatoire de la seconde arête dans la séquence en respectant la contrainte
 	// ex : si la séquence est de taille 10 et que i = 3, j peut être compris entre 5 et 9
 
@@ -201,14 +201,20 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 
 TSolution Appliquer2Opt(TSolution uneSol, int a, int b)
 {
-	int taille = uneSol.Seq.size();
-	while (a != b && (a - 1 + taille) % taille != b)
+    int taille = uneSol.Seq.size();
+	if (a > b)
 	{
-		auto tmp = uneSol.Seq[a];
-		uneSol.Seq[a] = uneSol.Seq[b];
-		uneSol.Seq[b] = tmp;
-		a = (a + 1) % taille;
-		b = (b - 1 + taille) % taille;
+		auto tmp = a;
+		a = (b + 1) % taille;
+		b = (tmp - 1 + taille) % taille;
 	}
-	return uneSol;
+    while (a < b)
+    {
+        auto tmp = uneSol.Seq[a];
+        uneSol.Seq[a] = uneSol.Seq[b];
+        uneSol.Seq[b] = tmp;
+        a = (a + 1) % taille;
+        b = (b - 1 + taille) % taille;
+    }
+    return uneSol;
 }
