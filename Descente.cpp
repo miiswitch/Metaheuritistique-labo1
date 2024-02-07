@@ -188,7 +188,8 @@ TSolution AppliquerVoisinage(const TSolution uneSol, TProblem unProb, TAlgo& unA
 	return (Copie);
 }
 
-
+//DESCRIPTION:    Application de la méthode 2-opt. La fonction retourne la solution voisine
+//selon la méthode appliquée sur les villes entre a et b inclus
 TSolution Appliquer2opt(TSolution uneSol, size_t a, size_t b)
 {
     int taille = uneSol.Seq.size();
